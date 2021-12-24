@@ -1,1 +1,155 @@
+Create your first AWS EC2 using terraform
+
+When it comes to IAC(Infrastructure As Code) Terraform is always the first choice of DevOps although there are many alternatives available in the market such as 
+Ansible, Chef, Puppet, SaltStack, CloudFormation but due the fact that -
+
+    Terraform is really easy install
+    Terraform has very good API documentation
+    It is widely adopted in the DevOps community
+    Great support for a popular cloud service provider such as Google Cloud Platform, AWS, Azure etc...
+    
+Prerequisite
+
+    The only prerequisite is - You must install Terraform before jumping to Google Cloud Setup.
+
+Table of Content
+
+   1 Setup AWS Account
+   2 Generate Access keys (access key ID and secret access key)
+   3 Create your first Terraform infrastructure (main.tf)
+   4 terraform commands
+
+1. Setup AWS Account
+
+To setup an AWS EC2 instance the first step would be to create an AWS account.
+
+2. Generate Access keys (access key ID and secret access key)
+
+Terraform installed on your Desktop/Laptop needs to communicate with AWS and to make this communication terraform needs to be authenticated.
+
+For authentication, we need to generate Access Keys (access key ID and secret access key). These access keys can be used for making - programmatic calls to 
+AWS from the AWS CLI, Tools for PowerShell, AWS SDKs, or direct AWS API calls.
+
+        1=> Goto My Security Credentials
+        2=> On Your Security Credentials page click on Access keys (access key ID and secret access key)
+        3=> Click on Create New Access key
+        4=> Copy the Access Key ID and Secret Access Key (Note:- You can view the Secret Access Key only once, so make sure to copy it.)
+
+3. Create your first Terraform infrastructure (main.tf)
+
+Before we start writing terraform script, the first thing to learn over here is - “You need to save your configuration with .tf extension”
+
+As Terraform is developed by HashiCorp, so we use HCL for writing the terraform scripts.
+
+We will start by creating an empty main.tf file.
+
+3.1 Provider
+
+The first line of code in which we are going to write is provider.
+
+We need to tell terraform which cloud provider we are going to connect .e.g - AWS, Google, or Azure
+
+As this we focused on AWS, so we are going to mention AWS as our provider.
+
+Here is the basic syntax for the provider
+
+resource "<PROVIDER>_<TYPE>" "<NAME>" {
+ [CONFIG …]
+}
+
+    “PROVIDER _ TYPE” ---- aws, google
+    “NAME” ---- You can define your name.
+
+This is how our final main.tf will look like for AWS -
+
+provider "aws" {
+  region     = "eu-central-1"
+  access_key = "XXXXXXXXXXXXXXXXXXXX"
+  secret_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+} 
+
+
+3.2 resource - “aws_instance”
+
+Now after defining the provider, next we are going define is resource.
+
+So what do you mean by resource?
+
+Resource - It is something that we are going to provision/start on AWS.
+
+Now for , we are going to provision EC2 instance on AWS.
+
+But before we provision the EC2 instance, we need to gather few points -
+
+    ami = you need to tell Terraform which AMI(Amazon Machine Image) you are going to use. Is it going to be Ubuntu, CentOS or something else
+    
+    instance_type = Also based on your need you have to choose the instance_type and it can be t2.nano, t2.micro, t2. small etc.
+
+3.3 How to find ami(Amazon Machine Image)
+
+   * To find the correct ami you need to Goto: Services -> EC2    
+
+   * In the left Navigation you will find Images -> AMIs
+
+   * On the search menu click on public images and then type Ubuntu
+
+   * Copy the AMI ID from the search result.
+
+3.4 How to find correct instance_type
+
+
+Since I am looking for a very basic instance_type not production level instance, so I choose t2.micro
+
+Here is the aws_instance configuration -
+
+resource "aws_instance" "ec2_example" {
+    ami = "ami-0767046d1677be5a0"  
+    instance_type = "t2.micro" 
+    tags = {
+        Name = "Terraform EC2"
+    }
+}
+
+
+4. terraform commands
+
+Alright, now we have completed all the pre-requisites for provisioning our first ec2 instance on the AWS.
+
+4.1 terraform init
+
+# terraform init 
+
+The terraform init command is responsible for downloading all the dependencies which are required for the provider AWS.
+
+Once you issue the terraform init command it will download all the provider’s dependencies on your local machine.
+
+4.2 terraform plan
+
+This command will help you to understand how many resources you are gonna add or delete.
+
+# terraform plan 
+
+As you can see the output of terraform plan, at the end it will show all the resources added and deleted.
+
+**(Note:- This command is not going to provision start your t2.micro instance)**
+
+4.3 terraform apply
+
+This command will do some real stuff on AWS. Once you will issue this command, it will be going to connect to AWS and then finally going to provision 
+AWS instance.
+
+# terraform apply 
+
+Let’s verify the setup by going back to AWS console.
+
+4.4 terraform destroy
+
+Now we have seen how to write your terraform script and how to provision your EC2 instance.
+
+Let see how to remove or delete everything from AWS.
+
+# terraform destroy 
+
+It will remove all the running EC2 Instances.
+
 
