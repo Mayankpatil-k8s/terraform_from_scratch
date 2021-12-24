@@ -1,0 +1,95 @@
+Terraform output values will be really useful when you want to debug your terraform code. Terraform output values can help you to print the 
+attributes reference(arn, instance_state, outpost_arn, public_ip, public_dns etc) on your console.
+
+The typical syntax of Terraform output values is -
+
+output "randam_output" {
+  value = "hello this is output"
+}
+
+Once you run your terraform apply command, it is going to print Hello this is output onto your console.
+
+But there are more than just simply outputting static text values with terraform output variables. You can do a lot more.
+
+Table of Content
+
+    1 How to print the public_ip of aws_instance?
+    2 How to create output.tf for terraform output values?
+    3 How to prevent printing sensitive info on the console?
+
+1. How to print the public_ip of aws_instance?
+
+This is one of the most classic examples for terraform output values. As we know terraform is used as Infrastructure as code, so with the help of 
+terraform you can provision many resources such - aws_instances, aws_vpc etc.
+
+But is there a way by which you can know the public_ip address of the instance which you are planning to provision using terraform?
+
+Yes, there is a really convenient and easy way to achieve that.
+
+--- Here is my aws_instance which I have defined as inside my main.tf -
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2G2LXXXXX"
+   secret_key = "r1oaShokKPw+YY7qaHxj8mD2T8BpxRUVXXXXXXXX"
+}
+
+resource "aws_instance" "ec2_example" {
+   
+   ami           = "ami-0767046d1677be5a0"
+   instance_type = "t2.micro"
+   subnet_id = aws_subnet.staging-subnet.id
+   
+   tags = {
+           Name = "test - Terraform EC2"
+   }
+}
+
+
+--- You can simply append following terraform output value code inside your main.tf file so that it can print the public ip of your aws_instance
+
+output "my_console_output" {
+  value = aws_instance.ec2_example.public_ip
+} 
+
+   * aws_instance - It is the keyword which you need write as is.
+   * ec2_example - The name which we have given at the time of creating aws_instance
+   * public_ip - You can use attributes reference page to get all the attribute which you want to print on console.
+
+
+The same approach can be followed to print - arn,instance_state,outpost_arn, password_data, primary_network_interface_id, private_dns, public_dns etc.
+
+2. How to create output.tf for terraform output values?
+
+In the previous point we have seen how to create your first terraform output values. But if you have noticed we have created the terraform output values 
+inside the same main.tffile.
+
+It is completely okay to create terraform output values inside the main.tf but this practice is certainly not recommended in the industry.
+
+The recommended way is to create a separate output.tf specially of the terraform output values, so that all the output values can be stored there.
+
+--- The only change which you need to do over here is to create a new output.tf and store the following terraform code init -
+output.tf
+
+output "my_console_output" {
+  value = aws_instance.ec2_example.public_ip
+} 
+
+
+3. How to prevent printing sensitive info on the console?
+
+As terraform output values help us to print the attributes reference values but sometimes you can not print all the values on console.
+
+So to prevent from printing sensitive values on the console you need to set sensitive = true.
+
+Here is an example of the terraform code where we want to prevent showing the public ip to console -
+
+output "my_console_output" {
+  value = aws_instance.ec2_example.public_ip
+  sensitive = true
+} 
+
+In the above code if you noticed we are using sensitive = true which tells terraform not to show public ip on console.
+
+
+
