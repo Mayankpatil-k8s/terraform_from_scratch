@@ -1,1 +1,332 @@
+How to use Terraform Input Variables
+
+Terraform input variables provides an easy and more flexible way to define values so that we can change the configuration of the terraform as per our need.
+
+What is Input Variables in Terraform?
+Answer - A value defined by the user which we can use inside terraform file for more customization.
+
+variable "YOUR_VARIABLE_NAME" {
+  description = "xyz"
+  type        = "string"
+  default     = "t2.micro"
+}
+
+Table of Content
+
+   1 Types of Terraform Variables
+   2 Terraform Variables - string, number, bool
+   3 Terraform Variables - list, set, map
+    
+ 
+Pre-requisite
+
+Before we start working with Terraform variables, here are the pre-requisites -
+
+    You must install terraform 
+    You must have either AWS account
+
+1. Types of Terraform Variables
+
+There are two types of variables in Terraform -
+
+   * Simple values
+   * Collection Variable
+
+1.1 Simple Values variables
+
+As the name suggests Simple Values variables are which hold only a single value. Here the types of Simple Value variables -
+
+   * string
+   * number
+   * bool
+
+1.2 Collection Variable
+
+In the collection variable, it consists of -
+
+   * List
+   * Map
+   * Set
+
+2.Terraform Variables - string, number, bool
+
+
+Let’s take a simple example in which we are going to set up an EC2 instance on AWS.
+
+So to create an EC2 instance we need two things -
+
+   * provider
+   * resource
+   
+Here is the main.tf which we are going to parameterized using terraform variables.
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2OBQHAALW"
+   secret_key = "ilKygurap8zSErv7jySTDi2796WGqMkEtN6txNHf"
+}
+
+resource "aws_instance" "ec2_example" {
+   
+   ami           = "ami-0767046d1677be5a0"
+   instance_type = "var.instance_type"
+   count = var.instance_count
+   associate_public_ip_address = var.enable_public_ip
+  
+   tags = {
+           Name = "Terraform EC2"
+   }
+}
+
+2.1 string variable type - We are going parameterized instance_type = “t2.micro”
+
+The first rule to create a parameter in terraform file is by defining variable block
+
+Example -
+
+variable "instance_type" {
+   description = "Instance type t2.micro"
+   type        = string
+   default     = "t2.micro"
+} 
+
+
+For defining variable block you need
+
+    * description : Small or short description about the purpose of the variable
+    * type : What type of variable it is going to be ex - string, bool, number …
+    * default : What would be the default value of the variable
+
+2.2 number variable type - We are going parameterized instance_count = 2
+
+The next variable type we are going to take is number.
+
+For example, we are going to increase the instance_count of the ec2_instances.
+
+Let’s create the variable first -
+
+variable "instance_count" {
+  description = "EC2 instance count"
+  type        = number
+  default     = 2
+}  
+
+2.3 boolean variable type - We are going parameterized enable_vpn_gateway = false
+
+The next variable type which we are going to discuss is bool.
+
+The bool variable can be used to set true or false values inside your terraform file.
+
+Here is an example to create your bool variable -
+
+variable "enable_public_ip" {
+  description = "Enable public IP address"
+  type        = bool
+  default     = true
+}
+
+
+
+3. Terraform Variables - list, set, map
+
+When it comes to collection input variables then we are talking about -
+
+   * List
+   * Map
+   * Set
+
+3.1 List variable type
+
+As the name suggests we are going to define a list that will contain more than one element in it.
+
+Let’s define our first List variable -
+
+Here is the list of IAM users
+
+variable "user_names" {
+  description = "IAM usernames"
+  type        = list(string)
+  default     = ["user1", "user2", "user3s"]
+}
+
+resource "aws_iam_user" "example" {
+  count = length(var.user_names)
+  name  = var.user_names[count.index]
+}
+
+
+3.2 Map variable type
+
+Terraform also supports the map variable type where you can define the key-valye pair.
+
+Let’s take an example where we need to define project and environment, so we can use the map variable to achieve that.
+
+Here is an example of map variable -
+
+variable "project_environment" {
+  description = "project name and environment"
+  type        = map(string)
+  default     = {
+    project     = "project-alpha",
+    environment = "dev"
+  }
+}
+
+resource "aws_instance" "ec2_example" {
+
+   ami           = "ami-0767046d1677be5a0"
+   instance_type =  "t2.micro"
+
+   tags = var.project_environment
+
+}
+
+
+
+What is variable.tf and terraform.tfvars?
+
+Table of Content
+
+  1  Terraform variable file - variable.tf
+  2  Terraform tfvars file - terraform.tfvars
+  3  Terraform multiple tfvars file
+  4  Terraform setting variable using command line var
+  
+1. Types of Terraform Variables
+
+--- Create a main.tf file
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2AYK7R6PQ"
+   secret_key = "S1Yg1Qm2JNSej8EHdhPTiu5l5ZD36URsedf32kNT"
+}
+
+resource "aws_instance" "ec2_example" {
+
+   ami           = "ami-0767046d1677be5a0"
+   instance_type =  var.instance_type
+
+   tags = {
+           Name = "Terraform EC2"
+   }
+} 
+
+--- Now create variable.tf
+
+variable "instance_type" {
+   description = "Instance type t2.micro"
+   type        = string
+   default     = "t2.micro"
+}
+
+2. Terraform tfvars file - terraform.tfvars
+
+--- Create a main.tf file
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2AYK7R6PQ"
+   secret_key = "S1Yg1Qm2JNSej8EHdhPTiu5l5ZD36URsedf32kNT"
+}
+
+resource "aws_instance" "ec2_example" {
+
+   ami           = "ami-0767046d1677be5a0"
+   instance_type =  var.instance_type
+
+   tags = {
+           Name = "Terraform EC2"
+   }
+} 
+
+
+--- Now create variable.tf but without any default values
+
+variable "instance_type" {
+}
+
+--- Finally create terraform.tfvars
+
+instance_type="t2.micro"
+
+
+3. Terraform multiple tfvars file
+
+
+There can be situation where you need create multiple tfvars files based on the environment like stage, production.
+
+So in such scenario you can create one tfvars file for each environment -
+
+    stage.tfvars
+    production.tfvars
+
+--- First Create your main.tf
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2AYK7R6PQ"
+   secret_key = "S1Yg1Qm2JNSej8EHdhPTiu5l5ZD36URsedf32kNT"
+}
+resource "aws_instance" "ec2_example" {
+
+   ami           = "ami-0767046d1677be5a0"
+   instance_type =  var.instance_type
+
+  tags = {
+           Name = var.environment_name
+   }
+
+} 
+
+--- Second create your variable.tf
+
+variable "instance_type" {
+}
+
+variable "environment_name" {
+}
+
+--- And third create your stage.tfvars for staging
+
+instance_type="t2.micro"
+
+environment_name ="stage" 
+
+#terraform plan -var-file="stage.tfvars"
+#terraform apply -var-file="stage.tfvars"
+
+4. Terraform setting variable using command line var
+
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = "AKIATQ37NXB2AYK7R6PQ"
+   secret_key = "S1Yg1Qm2JNSej8EHdhPTiu5l5ZD36UsdfA99NyYT"
+}
+
+resource "aws_instance" "ec2_example" {
+
+   ami           = "ami-0767046d1677be5a0"
+   instance_type =  var.instance_type
+
+   tags = {
+           Name = "Terraform EC2"
+   }
+} 
+
+variable "instance_type" {
+}
+
+
+Now run the following terraform command
+
+#terraform init
+
+#terraform plan -var="instance_type=t2.micro"
+
+#terraform apply -var="instance_type=t2.micro"
+
+
+
 
